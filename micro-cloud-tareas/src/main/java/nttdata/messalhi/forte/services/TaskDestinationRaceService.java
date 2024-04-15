@@ -3,16 +3,15 @@ package nttdata.messalhi.forte.services;
 
 import nttdata.messalhi.forte.dao.TaskDestinationDAO;
 import nttdata.messalhi.forte.entities.TaskDestination;
-import nttdata.messalhi.forte.entities.TaskInfo;
 import nttdata.messalhi.forte.utils.DatabaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 public class TaskDestinationRaceService {
+    private static String taskDestinationClass = "TaskDestination ";
     @Autowired
     private TaskDestinationDAO taskDestinationDAO;
     public boolean existsTaskDestination(String id) {
@@ -23,11 +22,11 @@ public class TaskDestinationRaceService {
         try{
             String id = taskDestination.getId();
             if (existsTaskDestination(id)){
-                return new DatabaseResult(false, "TaskDestination already exists");
+                return new DatabaseResult(false, taskDestinationClass +"already exists");
             }
             else{
                 this.taskDestinationDAO.save(taskDestination);
-                return new DatabaseResult(true, "TaskDestination" + id + " added to the database.");
+                return new DatabaseResult(true, taskDestinationClass + id + " added to the database.");
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -42,7 +41,7 @@ public class TaskDestinationRaceService {
                 return new DatabaseResult(true, taskDestination.toStringJSON()); // Operación exitosa
             }
             else{
-                return new DatabaseResult(false, "TaskDestination" + id + " not found");
+                return new DatabaseResult(false, taskDestinationClass + id + " not found");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,7 +54,7 @@ public class TaskDestinationRaceService {
             if (existsTaskDestination(id)) {
                 this.taskDestinationDAO.deleteById(id);
             }
-            return new DatabaseResult(true, "TaskDestination" + id + " deleted");
+            return new DatabaseResult(true, taskDestinationClass + id + " deleted");
         }catch (Exception e) {
             e.printStackTrace();
             return new DatabaseResult(false, e.getMessage());
@@ -75,10 +74,10 @@ public class TaskDestinationRaceService {
                 taskDestinationDB.setHttpMethod(httpMethod);
                 taskDestinationDB.setBody(body);
                 this.taskDestinationDAO.save(taskDestinationDB);
-                return new DatabaseResult(true, "TaskDestination" + id + " updated.");
+                return new DatabaseResult(true, taskDestinationClass + id + " updated.");
 
             } else {
-                return new DatabaseResult(false, "TaskDestination" + id + " not found");
+                return new DatabaseResult(false, taskDestinationClass + id + " not found");
             }
         } catch (Exception e) {
             e.printStackTrace();

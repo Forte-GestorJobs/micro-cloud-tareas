@@ -1,6 +1,7 @@
-package nttdata.messalhi.forte.entities;
-
+package nttdata.messalhi.forte.auxi;
 import java.util.Date;
+
+
 
 public class TaskCreationDTO {
     //TASKINFO
@@ -21,7 +22,9 @@ public class TaskCreationDTO {
     private String scheduleExpression;
     private String timeZone;
 
-    public TaskCreationDTO(){}
+    public TaskCreationDTO(){
+        //
+    }
 
     public String getName() {
         return name;
@@ -118,4 +121,5 @@ public class TaskCreationDTO {
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
+
 }

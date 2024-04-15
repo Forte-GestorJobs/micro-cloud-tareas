@@ -4,9 +4,7 @@ package nttdata.messalhi.forte.http;
 import nttdata.messalhi.forte.entities.TaskInfo;
 import nttdata.messalhi.forte.services.TaskInfoRaceService;
 import nttdata.messalhi.forte.utils.DatabaseResult;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,9 +24,9 @@ public class TaskInfoRaceController {
         return this.taskInfoRaceService.getTaskInfo(arn);
     }
 
-    @GetMapping("/TaskInfo/list/{user_id}")
-    public DatabaseResult listTaskInfo(@PathVariable String user_id) {
-        return this.taskInfoRaceService.listTaskInfo(user_id);
+    @GetMapping("/TaskInfo/list/{userId}")
+    public DatabaseResult listTaskInfo(@PathVariable String userId) {
+        return this.taskInfoRaceService.listTaskInfo(userId);
     }
 
     @DeleteMapping("/TaskInfo/{arn}")

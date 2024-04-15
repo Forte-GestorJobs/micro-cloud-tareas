@@ -1,11 +1,10 @@
 package nttdata.messalhi.forte.http;
 
 
-import nttdata.messalhi.forte.entities.TaskCreationDTO;
+import nttdata.messalhi.forte.auxi.TaskCreationDTO;
 import nttdata.messalhi.forte.services.TaskCreationDTORaceService;
 import nttdata.messalhi.forte.utils.DatabaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

@@ -2,9 +2,8 @@ package nttdata.messalhi.forte.services;
 
 
 import nttdata.messalhi.forte.auxi.AWSHelper;
-import nttdata.messalhi.forte.dao.TaskDestinationDAO;
 import nttdata.messalhi.forte.dao.TaskInfoDAO;
-import nttdata.messalhi.forte.entities.TaskCreationDTO;
+import nttdata.messalhi.forte.auxi.TaskCreationDTO;
 import nttdata.messalhi.forte.entities.TaskDestination;
 import nttdata.messalhi.forte.entities.TaskInfo;
 import nttdata.messalhi.forte.entities.TaskSchedule;
@@ -15,11 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class TaskCreationDTORaceService {
+    private static String taskClass = "Task ";
     @Autowired
     TaskInfoRaceService taskInfoRaceService = new TaskInfoRaceService();
 
@@ -32,7 +31,7 @@ public class TaskCreationDTORaceService {
     @Autowired
     private TaskInfoDAO taskInfoDAO;
 
-    Logger logger = LoggerFactory.getLogger(TaskScheduleRaceService.class);
+    Logger logger = LoggerFactory.getLogger(TaskCreationDTORaceService.class);
 
     public boolean existsTaskInfo(Long id) {
         Optional<TaskInfo> optUser = this.taskInfoDAO.findById(id);
@@ -73,7 +72,7 @@ public class TaskCreationDTORaceService {
             //    return new DatabaseResult(false, "Error creating TaskSchedule: " + resultTS.getMessage());
             //}
 
-            return new DatabaseResult(true, "Task " + taskInfo.getId() + " created successfully");
+            return new DatabaseResult(true, taskClass + taskInfo.getId() + " created successfully");
         } catch (Exception e) {
             e.printStackTrace();
             return new DatabaseResult(false, "Error: " + e.getMessage());
@@ -85,11 +84,10 @@ public class TaskCreationDTORaceService {
         try{
             if (existsTaskInfo(id)) {
                 TaskInfo taskInfo = this.taskInfoDAO.getReferenceById(id);
-                //TaskDestination taskDestination = taskInfo.getTarget();
                 return new DatabaseResult(true, taskInfo.toStringJSON()); // Operación exitosa
             }
             else{
-                return new DatabaseResult(false, "Task with arn: " + id + " not found");
+                return new DatabaseResult(false, taskClass + "with arn: " + id + " not found");
             }
         } catch (Exception e){
             e.printStackTrace();
@@ -107,9 +105,9 @@ public class TaskCreationDTORaceService {
                     return new DatabaseResult(false, "Error deleting AWS Schedule: " + resultadoConsultaAWS.getMessage());
                 }
                 this.taskInfoDAO.deleteById(id);
-                return new DatabaseResult(true, "Task " + id + " deleted");
+                return new DatabaseResult(true, taskClass + id + " deleted");
             }
-            return new DatabaseResult(true, "Task " + id + " deleted");
+            return new DatabaseResult(true, taskClass + id + " deleted");
         }catch (Exception e) {
             e.printStackTrace();
             return new DatabaseResult(false, e.getMessage());
@@ -120,36 +118,38 @@ public class TaskCreationDTORaceService {
     public DatabaseResult updateTask(TaskCreationDTO taskCreationDTO, Long taskId) {
         try {
             // Buscar la tarea existente por su ID
-            TaskInfo taskInfo = taskInfoDAO.getReferenceById(taskId);
-            if (taskInfo == null) {
+            if (!existsTaskInfo(taskId)) {
                 return new DatabaseResult(false, "Task not found with ID: " + taskId);
             }
-            taskInfo.setDescription(taskCreationDTO.getDescription());
-            taskInfo.setState(taskCreationDTO.getState());
+            else{
+                TaskInfo taskInfo = taskInfoDAO.getReferenceById(taskId);
+                taskInfo.setDescription(taskCreationDTO.getDescription());
+                taskInfo.setState(taskCreationDTO.getState());
 
-            TaskDestination taskDestination = taskInfo.getTarget();
-            taskDestination.setUrl(taskCreationDTO.getUrl());
-            taskDestination.setHttpMethod(taskCreationDTO.getHttpMethod());
-            taskDestination.setBody(taskCreationDTO.getBody());
+                TaskDestination taskDestination = taskInfo.getTarget();
+                taskDestination.setUrl(taskCreationDTO.getUrl());
+                taskDestination.setHttpMethod(taskCreationDTO.getHttpMethod());
+                taskDestination.setBody(taskCreationDTO.getBody());
 
-            TaskSchedule taskSchedule = taskInfo.getSchedule();
-            taskSchedule.setScheduleExpression(taskCreationDTO.getScheduleExpression());
-            taskSchedule.setType(taskCreationDTO.getType());
-            taskSchedule.setStartDate(taskCreationDTO.getStartDate());
-            taskSchedule.setEndDate(taskCreationDTO.getEndDate());
-            taskSchedule.setTimeZone(taskCreationDTO.getTimeZone());
+                TaskSchedule taskSchedule = taskInfo.getSchedule();
+                taskSchedule.setScheduleExpression(taskCreationDTO.getScheduleExpression());
+                taskSchedule.setType(taskCreationDTO.getType());
+                taskSchedule.setStartDate(taskCreationDTO.getStartDate());
+                taskSchedule.setEndDate(taskCreationDTO.getEndDate());
+                taskSchedule.setTimeZone(taskCreationDTO.getTimeZone());
 
-            ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.updateSchedule(taskInfo.getUserId()+"."+taskInfo.getName(), taskCreationDTO.getDescription(), taskCreationDTO.getState(),taskCreationDTO.getScheduleExpression());
-            logger.info("Resultado update AWS: "+ resultadoConsultaAWS.getMessage());
-            if (!resultadoConsultaAWS.isSuccess()) {
-                return new DatabaseResult(false, "Error updating AWS Schedule: " + resultadoConsultaAWS.getMessage());
+                ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.updateSchedule(taskInfo.getUserId()+"."+taskInfo.getName(), taskCreationDTO.getDescription(), taskCreationDTO.getState(),taskCreationDTO.getScheduleExpression());
+                logger.debug(String.format("Resultado update AWS: %s", resultadoConsultaAWS.getMessage()));
+                if (!resultadoConsultaAWS.isSuccess()) {
+                    return new DatabaseResult(false, "Error updating AWS Schedule: " + resultadoConsultaAWS.getMessage());
+                }
+                DatabaseResult result = taskInfoRaceService.updateTaskInfo(taskInfo);
+                if (!result.isSuccess()) {
+                    return new DatabaseResult(false, "Error updating Task: " + result.getMessage());
+                }
+
+                return new DatabaseResult(true, "Task " + taskId + " updated successfully");
             }
-            DatabaseResult result = taskInfoRaceService.updateTaskInfo(taskInfo);
-            if (!result.isSuccess()) {
-                return new DatabaseResult(false, "Error updating Task: " + result.getMessage());
-            }
-
-            return new DatabaseResult(true, "Task " + taskId + " updated successfully");
         } catch (Exception e) {
             e.printStackTrace();
             return new DatabaseResult(false, "Error: " + e.getMessage());

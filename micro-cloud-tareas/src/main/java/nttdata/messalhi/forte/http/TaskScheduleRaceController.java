@@ -5,7 +5,6 @@ import nttdata.messalhi.forte.entities.TaskSchedule;
 import nttdata.messalhi.forte.services.TaskScheduleRaceService;
 import nttdata.messalhi.forte.utils.DatabaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,9 +24,9 @@ public class TaskScheduleRaceController {
         return this.taskScheduleRaceService.getTaskSchedule(id);
     }
 
-    @GetMapping("/TaskSchedule/list/{task_id}")
-    public DatabaseResult listTaskSchedule(@PathVariable String task_id) {
-        return this.taskScheduleRaceService.listTaskSchedule(task_id);
+    @GetMapping("/TaskSchedule/list/{taskId}")
+    public DatabaseResult listTaskSchedule(@PathVariable String taskId) {
+        return this.taskScheduleRaceService.listTaskSchedule(taskId);
     }
 
     @DeleteMapping("/TaskSchedule/{id}")

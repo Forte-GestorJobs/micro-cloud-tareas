@@ -1,8 +1,6 @@
 package nttdata.messalhi.forte.entities;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -102,7 +100,6 @@ public class TaskSchedule {
 
     public String toStringJSON() {
         try {
-            ObjectMapper mapper = new ObjectMapper();
             // Crear un objeto JSON con todos los campos de TaskSchedule y solo el ID de TaskInfo
             return "{ \"id\": \"" + this.id + "\", " +
                     "\"type\": \"" + this.type + "\", " +

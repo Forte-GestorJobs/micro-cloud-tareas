@@ -6,6 +6,7 @@ import com.amazonaws.services.scheduler.model.*;
 import nttdata.messalhi.forte.utils.ResultadoConsultaAWS;
 
 public class AWSHelper {
+    private AWSHelper(){}
     public static ResultadoConsultaAWS createSchedule(String name, String description, String state, String scheduleExpression) {
         try {
             AmazonScheduler amazonScheduler = AmazonSchedulerClientBuilder.defaultClient();
