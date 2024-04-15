@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "taskinfo")
@@ -22,14 +24,11 @@ public class TaskInfo {
     private Date lastModification;
     private String userId;
 
-    @OneToOne(optional = false, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
     private TaskDestination target;
 
-    /*
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @MapsId
+    @OneToOne(mappedBy = "taskInfo", optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
     private TaskSchedule schedule;
-    */
 
     public TaskInfo() {
     }
@@ -113,11 +112,29 @@ public class TaskInfo {
         this.target = target;
     }
 
+    public TaskSchedule getSchedule() {
+        return schedule;
+    }
+
+    public void setSchedule(TaskSchedule schedule) {
+        this.schedule = schedule;
+    }
+
     public String toStringJSON() {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
+            StringBuilder jsonBuilder = new StringBuilder("{");
+            jsonBuilder.append("\"id\": \"").append(this.id).append("\", ");
+            jsonBuilder.append("\"arn\": \"").append(this.arn).append("\", ");
+            jsonBuilder.append("\"name\": \"").append(this.name).append("\", ");
+            jsonBuilder.append("\"description\": \"").append(this.description).append("\", ");
+            jsonBuilder.append("\"state\": \"").append(this.state).append("\", ");
+            jsonBuilder.append("\"creationDate\": \"").append(this.creationDate).append("\", ");
+            jsonBuilder.append("\"lastModification\": \"").append(this.lastModification).append("\", ");
+            jsonBuilder.append("\"userId\": \"").append(this.userId).append("\", ");
+            jsonBuilder.append("\"target\": ").append(this.target.toStringJSON()).append(", ");
+            jsonBuilder.append("\"schedule\": ").append(this.schedule.toStringJSON()).append("}");
+            return jsonBuilder.toString();
+        } catch (Exception e) {
             e.printStackTrace();
             return "{}"; // Manejo de errores
         }

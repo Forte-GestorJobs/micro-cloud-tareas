@@ -22,23 +22,17 @@ public class TaskDestinationRaceService {
     public DatabaseResult addTaskDestination(TaskDestination taskDestination) {
         try{
             String id = taskDestination.getId();
-            String url = taskDestination.getUrl();
-            String httpMethod = taskDestination.getHttpMethod();
-            String body = taskDestination.getBody();
-
             if (existsTaskDestination(id)){
                 return new DatabaseResult(false, "TaskDestination already exists");
             }
             else{
-                TaskDestination taskDestinationDB = new TaskDestination(id, url, httpMethod, body);
-                this.taskDestinationDAO.save(taskDestinationDB);
+                this.taskDestinationDAO.save(taskDestination);
                 return new DatabaseResult(true, "TaskDestination" + id + " added to the database.");
             }
         }catch (Exception e){
             e.printStackTrace();
             return new DatabaseResult(false, e.getMessage());
         }
-
     }
 
     public DatabaseResult getTaskDestination(String id) {

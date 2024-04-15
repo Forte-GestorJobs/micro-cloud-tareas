@@ -33,30 +33,12 @@ public class TaskInfoRaceService {
         try{
             String name = taskInfo.getName();
             String userId = taskInfo.getUserId();
-            String description = taskInfo.getDescription();
-            String state = taskInfo.getState();
-
             if(existsTaskInfoNameAndUserID(name, userId)){
                 return new DatabaseResult(false, "TaskInfo already exists");
             }
             else{
-                TaskDestination target = taskDestinationDAO.findById(userId+"."+name).orElse(null);
-                if (target == null){
-                    return new DatabaseResult(false, "No se puede crear TaskInfo sin TaskDestination correspondiente para la tarea " + name);
-                }
-                else{
-                    TaskInfo taskInfoDB = new TaskInfo(name, description, state, userId);
-                    taskInfoDB.setTarget(target);
-                    ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.crearSchedule(userId+"."+name, description, state, "rate(1 minute)"); //Sustituir la expresion
-                    if (!resultadoConsultaAWS.isSuccess()){
-                        return new DatabaseResult(false, resultadoConsultaAWS.getMessage());
-                    }
-                    else{
-                        taskInfoDB.setArn(resultadoConsultaAWS.getMessage());
-                        taskInfoDAO.save(taskInfoDB);
-                        return new DatabaseResult(true, "TaskInfo " + taskInfoDB.getId() + " created");
-                    }
-                }
+                taskInfoDAO.save(taskInfo);
+                return new DatabaseResult(true, "TaskInfo " + taskInfo.getId() + " created");
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -87,8 +69,14 @@ public class TaskInfoRaceService {
         try {
             TaskInfo taskInfo = this.taskInfoDAO.getReferenceById(id);
             if (taskInfo != null) {
-                this.taskDestinationDAO.deleteById(taskInfo.getTarget().getId());
                 this.taskInfoDAO.deleteById(id);
+                ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.deleteSchedule(taskInfo.getUserId()+"."+taskInfo.getName());
+                if (!resultadoConsultaAWS.isSuccess()){
+                    return new DatabaseResult(false, resultadoConsultaAWS.getMessage());
+                }
+                else{
+                    return new DatabaseResult(true, "TaskInfo " + id +  " deleted");
+                }
             }
             return new DatabaseResult(true, "TaskInfo " + id +  " deleted");
         } catch (Exception e) {
@@ -100,12 +88,10 @@ public class TaskInfoRaceService {
     public DatabaseResult updateTaskInfo(TaskInfo taskInfo) {
         try{
             Long id = taskInfo.getId();
-            String name = taskInfo.getName();
             String description = taskInfo.getDescription();
             String state = taskInfo.getState();
             if (existsTaskInfo(id)) {
                 TaskInfo taskInfoDB = this.taskInfoDAO.getReferenceById(id);
-                taskInfoDB.setName(name);
                 taskInfoDB.setDescription(description);
                 taskInfoDB.setState(state);
                 this.taskInfoDAO.save(taskInfoDB);

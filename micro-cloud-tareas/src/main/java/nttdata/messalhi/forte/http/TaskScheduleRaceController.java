@@ -21,22 +21,22 @@ public class TaskScheduleRaceController {
     }
 
     @GetMapping("/TaskSchedule/{id}")
-    public ResponseEntity<String> getTaskSchedule(@PathVariable String arn) {
-        return this.taskScheduleRaceService.getTaskSchedule(arn);
+    public DatabaseResult getTaskSchedule(@PathVariable String id) {
+        return this.taskScheduleRaceService.getTaskSchedule(id);
     }
 
     @GetMapping("/TaskSchedule/list/{task_id}")
-    public ResponseEntity<String> listTaskSchedule(@PathVariable String user_id) {
-        return this.taskScheduleRaceService.listTaskSchedule(user_id);
+    public DatabaseResult listTaskSchedule(@PathVariable String task_id) {
+        return this.taskScheduleRaceService.listTaskSchedule(task_id);
     }
 
     @DeleteMapping("/TaskSchedule/{id}")
-    public ResponseEntity<String> deleteTaskSchedule(@PathVariable String arn) {
-        return this.taskScheduleRaceService.deleteTaskSchedule(arn);
+    public DatabaseResult deleteTaskSchedule(@PathVariable String id) {
+        return this.taskScheduleRaceService.deleteTaskSchedule(id);
     }
 
     @PutMapping("/TaskSchedule")
-    public ResponseEntity<String> updateTaskSchedule(@RequestBody TaskSchedule taskSchedule) {
+    public DatabaseResult updateTaskSchedule(@RequestBody TaskSchedule taskSchedule) {
         return this.taskScheduleRaceService.updateTaskSchedule(taskSchedule);
     }
 

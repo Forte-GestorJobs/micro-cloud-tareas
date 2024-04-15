@@ -1,9 +1,9 @@
 package nttdata.messalhi.forte.entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.*;
 
 import java.util.Date;
 
@@ -12,7 +12,6 @@ import java.util.Date;
 public class TaskSchedule {
     @Id
     private String id;
-    //VER COMO AÑADIR EL TASK, RELACION DE 1 A (1-N)
     private String type;
     private Date startDate;
     private Date endDate;
@@ -20,15 +19,19 @@ public class TaskSchedule {
     private String scheduleExpression;
     private String timeZone;
 
+    @ManyToOne
+    @JoinColumn(name = "taskinfo_id")
+    private TaskInfo taskInfo;
+
     public TaskSchedule() {
     }
 
-    public TaskSchedule(String id, String type, Date startDate, Date endDate, Date creationDate, String scheduleExpression, String timeZone) {
+    public TaskSchedule(String id, String type, Date startDate, Date endDate, String scheduleExpression, String timeZone) {
         this.id = id;
         this.type = type;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.creationDate = creationDate;
+        this.creationDate = new Date();
         this.scheduleExpression = scheduleExpression;
         this.timeZone = timeZone;
     }
@@ -87,5 +90,31 @@ public class TaskSchedule {
 
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
+    }
+
+    public TaskInfo getTaskInfo() {
+        return taskInfo;
+    }
+
+    public void setTaskInfo(TaskInfo taskInfo) {
+        this.taskInfo = taskInfo;
+    }
+
+    public String toStringJSON() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            // Crear un objeto JSON con todos los campos de TaskSchedule y solo el ID de TaskInfo
+            return "{ \"id\": \"" + this.id + "\", " +
+                    "\"type\": \"" + this.type + "\", " +
+                    "\"startDate\": \"" + this.startDate + "\", " +
+                    "\"endDate\": \"" + this.endDate + "\", " +
+                    "\"creationDate\": \"" + this.creationDate + "\", " +
+                    "\"scheduleExpression\": \"" + this.scheduleExpression + "\", " +
+                    "\"timeZone\": \"" + this.timeZone + "\", " +
+                    "\"taskId\": \"" + this.taskInfo.getId() + "\" }";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "{}"; // Manejo de errores
+        }
     }
 }
