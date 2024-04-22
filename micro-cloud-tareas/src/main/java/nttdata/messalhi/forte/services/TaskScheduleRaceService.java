@@ -71,7 +71,6 @@ public class TaskScheduleRaceService {
     public DatabaseResult updateTaskSchedule(TaskSchedule taskSchedule) { //Es necesario??
         try {
             String id = taskSchedule.getId();
-            String type = taskSchedule.getType();
             Date startDate = taskSchedule.getStartDate();
             Date endDate = taskSchedule.getEndDate();
             Date creationDate = new Date();
@@ -80,7 +79,6 @@ public class TaskScheduleRaceService {
 
             if (existsTaskSchedule(id)) {
                 TaskSchedule taskScheduleDB = taskScheduleDAO.getReferenceById(id);
-                taskScheduleDB.setType(type);
                 taskScheduleDB.setStartDate(startDate);
                 taskScheduleDB.setEndDate(endDate);
                 taskScheduleDB.setCreationDate(creationDate);

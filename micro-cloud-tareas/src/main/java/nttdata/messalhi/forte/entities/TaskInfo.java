@@ -33,6 +33,8 @@ public class TaskInfo {
         this.description = description;
         this.state = state;
         this.userId = userId;
+        this.creationDate = new Date();
+        this.lastModification = new Date();
     }
 
     public Long getId() {

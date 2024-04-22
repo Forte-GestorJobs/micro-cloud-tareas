@@ -10,13 +10,13 @@ import java.util.Date;
 public class TaskSchedule {
     @Id
     private String id;
-    private String type;
     private Date startDate;
     private Date endDate;
     private Date creationDate;
     private String scheduleExpression;
     private String timeZone;
 
+    private int maximumTimeWindowInMinutes;
     @ManyToOne
     @JoinColumn(name = "taskinfo_id")
     private TaskInfo taskInfo;
@@ -24,14 +24,14 @@ public class TaskSchedule {
     public TaskSchedule() {
     }
 
-    public TaskSchedule(String id, String type, Date startDate, Date endDate, String scheduleExpression, String timeZone) {
+    public TaskSchedule(String id, Date startDate, Date endDate, String scheduleExpression, String timeZone, int maximumTimeWindowInMinutes) {
         this.id = id;
-        this.type = type;
         this.startDate = startDate;
         this.endDate = endDate;
         this.creationDate = new Date();
         this.scheduleExpression = scheduleExpression;
         this.timeZone = timeZone;
+        this.maximumTimeWindowInMinutes = maximumTimeWindowInMinutes;
     }
 
     public String getId() {
@@ -40,14 +40,6 @@ public class TaskSchedule {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public Date getStartDate() {
@@ -98,16 +90,24 @@ public class TaskSchedule {
         this.taskInfo = taskInfo;
     }
 
+    public int getMaximumTimeWindowInMinutes() {
+        return maximumTimeWindowInMinutes;
+    }
+
+    public void setMaximumTimeWindowInMinutes(int maximumTimeWindowInMinutes) {
+        this.maximumTimeWindowInMinutes = maximumTimeWindowInMinutes;
+    }
+
     public String toStringJSON() {
         try {
             // Crear un objeto JSON con todos los campos de TaskSchedule y solo el ID de TaskInfo
             return "{ \"id\": \"" + this.id + "\", " +
-                    "\"type\": \"" + this.type + "\", " +
                     "\"startDate\": \"" + this.startDate + "\", " +
                     "\"endDate\": \"" + this.endDate + "\", " +
                     "\"creationDate\": \"" + this.creationDate + "\", " +
                     "\"scheduleExpression\": \"" + this.scheduleExpression + "\", " +
                     "\"timeZone\": \"" + this.timeZone + "\", " +
+                    "\"maximumTimeWindowInMinutes\": \"" + this.maximumTimeWindowInMinutes + "\", " +
                     "\"taskId\": \"" + this.taskInfo.getId() + "\" }";
         } catch (Exception e) {
             e.printStackTrace();

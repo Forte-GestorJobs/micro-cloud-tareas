@@ -16,11 +16,11 @@ public class TaskCreationDTO {
     private String body;
 
     //TASKSCHEDULE
-    private String type;
     private Date startDate;
     private Date endDate;
     private String scheduleExpression;
     private String timeZone;
+    private int maximumTimeWindowInMinutes;
 
     public TaskCreationDTO(){
         //
@@ -82,14 +82,6 @@ public class TaskCreationDTO {
         this.body = body;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public Date getStartDate() {
         return startDate;
     }
@@ -122,4 +114,11 @@ public class TaskCreationDTO {
         this.timeZone = timeZone;
     }
 
+    public int getMaximumTimeWindowInMinutes() {
+        return maximumTimeWindowInMinutes;
+    }
+
+    public void setMaximumTimeWindowInMinutes(int maximumTimeWindowInMinutes) {
+        this.maximumTimeWindowInMinutes = maximumTimeWindowInMinutes;
+    }
 }

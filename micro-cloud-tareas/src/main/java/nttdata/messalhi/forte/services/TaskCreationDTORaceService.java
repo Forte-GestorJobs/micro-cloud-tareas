@@ -13,8 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.Optional;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class TaskCreationDTORaceService {
@@ -39,16 +42,28 @@ public class TaskCreationDTORaceService {
     }
 
     public DatabaseResult addTask(TaskCreationDTO taskCreationDTO) {
+        List<String> validTimeZones = Arrays.asList(
+                "Europe/London", "Europe/Madrid", "Europe/Paris", "Europe/Berlin",
+                "Europe/Moscow", "America/New_York", "America/Los_Angeles",
+                "America/Sao_Paulo", "Asia/Tokyo", "Asia/Shanghai"
+        );
+
         try {
+            if (taskCreationDTO.getMaximumTimeWindowInMinutes()>1440){
+                return new DatabaseResult(false, "El maximumTimeWindow debe ser menor a 1440 minutos");
+            }
+            if (!validTimeZones.contains(taskCreationDTO.getTimeZone())){
+                return new DatabaseResult(false, "Invalid TimeZone: " + taskCreationDTO.getTimeZone());
+            }
             TaskDestination taskDestination = new TaskDestination(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getUrl(), taskCreationDTO.getHttpMethod(), taskCreationDTO.getBody());
             TaskInfo taskInfo = new TaskInfo(taskCreationDTO.getName(), taskCreationDTO.getDescription(), taskCreationDTO.getState(), taskCreationDTO.getUserId());
-            TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getType(), taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone());
+            TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone(), taskCreationDTO.getMaximumTimeWindowInMinutes());
             taskInfo.setTarget(taskDestination);
             taskInfo.setSchedule(taskSchedule);
             taskSchedule.setTaskInfo(taskInfo);
 
             // Guardar AWS Schedule
-            ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.createSchedule(taskCreationDTO.getUserId() + "." + taskCreationDTO.getName(), taskCreationDTO.getDescription(), taskCreationDTO.getState(), taskCreationDTO.getScheduleExpression());
+            ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.createSchedule(taskInfo, buildInputAWS(taskInfo));
             if (!resultadoConsultaAWS.isSuccess()) {
                 return new DatabaseResult(false, "Error creating AWS Schedule: " + resultadoConsultaAWS.getMessage());
             }
@@ -116,12 +131,23 @@ public class TaskCreationDTORaceService {
     }
 
     public DatabaseResult updateTask(TaskCreationDTO taskCreationDTO, Long taskId) {
+        List<String> validTimeZones = Arrays.asList(
+                "Europe/London", "Europe/Madrid", "Europe/Paris", "Europe/Berlin",
+                "Europe/Moscow", "America/New_York", "America/Los_Angeles",
+                "America/Sao_Paulo", "Asia/Tokyo", "Asia/Shanghai"
+        );
         try {
             // Buscar la tarea existente por su ID
             if (!existsTaskInfo(taskId)) {
                 return new DatabaseResult(false, "Task not found with ID: " + taskId);
             }
             else{
+                if (taskCreationDTO.getMaximumTimeWindowInMinutes()>1440){
+                    return new DatabaseResult(false, "El maximumTimeWindow debe ser menor a 1440 minutos");
+                }
+                if (!validTimeZones.contains(taskCreationDTO.getTimeZone())){
+                    return new DatabaseResult(false, "Invalid TimeZone: " + taskCreationDTO.getTimeZone());
+                }
                 TaskInfo taskInfo = taskInfoDAO.getReferenceById(taskId);
                 taskInfo.setDescription(taskCreationDTO.getDescription());
                 taskInfo.setState(taskCreationDTO.getState());
@@ -133,12 +159,12 @@ public class TaskCreationDTORaceService {
 
                 TaskSchedule taskSchedule = taskInfo.getSchedule();
                 taskSchedule.setScheduleExpression(taskCreationDTO.getScheduleExpression());
-                taskSchedule.setType(taskCreationDTO.getType());
                 taskSchedule.setStartDate(taskCreationDTO.getStartDate());
                 taskSchedule.setEndDate(taskCreationDTO.getEndDate());
                 taskSchedule.setTimeZone(taskCreationDTO.getTimeZone());
+                taskSchedule.setMaximumTimeWindowInMinutes(taskCreationDTO.getMaximumTimeWindowInMinutes());
 
-                ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.updateSchedule(taskInfo.getUserId()+"."+taskInfo.getName(), taskCreationDTO.getDescription(), taskCreationDTO.getState(),taskCreationDTO.getScheduleExpression());
+                ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.updateSchedule(taskInfo.getUserId()+"."+taskInfo.getName(), taskCreationDTO.getDescription(), taskCreationDTO.getState(),taskCreationDTO.getScheduleExpression(), taskCreationDTO.getMaximumTimeWindowInMinutes());
                 logger.debug(String.format("Resultado update AWS: %s", resultadoConsultaAWS.getMessage()));
                 if (!resultadoConsultaAWS.isSuccess()) {
                     return new DatabaseResult(false, "Error updating AWS Schedule: " + resultadoConsultaAWS.getMessage());
@@ -154,6 +180,31 @@ public class TaskCreationDTORaceService {
             e.printStackTrace();
             return new DatabaseResult(false, "Error: " + e.getMessage());
         }
+    }
+
+
+
+    public String buildInputAWS(TaskInfo taskInfo) throws JsonProcessingException {
+        // Crear un objeto ObjectMapper para convertir objetos Java a JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // Construir un mapa para representar el JSON
+        Map<String, Object> jsonMap = new HashMap<>();
+        jsonMap.put("user_id", taskInfo.getName());
+        jsonMap.put("schedule_id", taskInfo.getUserId() + "." + taskInfo.getName());
+        jsonMap.put("url", taskInfo.getTarget().getUrl());
+        jsonMap.put("http_method", taskInfo.getTarget().getHttpMethod());
+        jsonMap.put("body", taskInfo.getTarget().getBody());
+
+        // Convertir la fecha a una cadena en el formato deseado
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        String dateString = dateFormat.format(new Date());
+        jsonMap.put("date", dateString);
+
+        // Convertir el mapa a una cadena JSON
+        String jsonInput = objectMapper.writeValueAsString(jsonMap);
+
+        return jsonInput;
     }
 
 

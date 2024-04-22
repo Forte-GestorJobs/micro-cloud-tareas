@@ -7,9 +7,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-
 @SpringBootApplication
 @ServletComponentScan
 public class App extends SpringBootServletInitializer {
