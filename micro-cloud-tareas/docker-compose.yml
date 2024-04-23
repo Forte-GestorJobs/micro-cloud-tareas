@@ -20,7 +20,7 @@ services:
     #build:
       #context: .
       #dockerfile: Dockerfile
-    image: ghcr.io/mohamed11302/pruebas:latest
+    image: ghcr.io/forte-gestorjobs/micro-cloud-tareas:latest
     environment:
       MCT_DBHOST: testdb
       MCT_DBNAME: testdb

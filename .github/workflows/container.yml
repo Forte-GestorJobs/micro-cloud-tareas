@@ -61,5 +61,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Subir contenedor Docker a GHCR 
-        run: docker push ghcr.io/forte-gestorjobs/micro-cloud-tareas:${{ steps.get_date.outputs.date }}
+        run: |
+          docker push ghcr.io/forte-gestorjobs/micro-cloud-tareas:${{ steps.get_date.outputs.date }}
+          docker push ghcr.io/forte-gestorjobs/micro-cloud-tareas:latest
         working-directory: micro-cloud-tareas
