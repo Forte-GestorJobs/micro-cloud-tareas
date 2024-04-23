@@ -44,13 +44,13 @@ jobs:
 
       - name: Obtener la fecha actual
         id: get_date
-        run: echo "::set-output name=date::$(date +'%Y%m%d')"
+        run: echo "::set-output name=date::$(date +'%Y%m%d%H%M')"
         working-directory: micro-cloud-tareas
 
       - name: Etiquetar contenedor Docker
         run: |
-          docker tag micro-cloud-tareas ghcr.io/mohamed11302/pruebas:${{ steps.get_date.outputs.date }}
-          docker tag micro-cloud-tareas ghcr.io/mohamed11302/pruebas:latest
+          docker tag micro-cloud-tareas ghcr.io/mohamed11302/micro-cloud-tareas:${{ steps.get_date.outputs.date }}
+          docker tag micro-cloud-tareas ghcr.io/mohamed11302/micro-cloud-tareas:latest
         working-directory: micro-cloud-tareas
 
       - name: Iniciar sesión en GHCR
@@ -61,5 +61,5 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Subir contenedor Docker a GHCR 
-        run: docker push ghcr.io/mohamed11302/pruebas:${{ steps.get_date.outputs.date }}
+        run: docker push ghcr.io/mohamed11302/micro-cloud-tareas:${{ steps.get_date.outputs.date }}
         working-directory: micro-cloud-tareas
