@@ -5,6 +5,8 @@ import nttdata.messalhi.forte.auxi.TaskCreationDTO;
 import nttdata.messalhi.forte.services.TaskCreationDTORaceService;
 import nttdata.messalhi.forte.utils.DatabaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,12 +25,20 @@ public class TaskCreationDTORaceController {
     public DatabaseResult getTaskSchedule(@PathVariable Long id) {
         return this.taskCreationDTORaceService.getTask(id);
     }
-/*
-    @GetMapping("/TaskSchedule/list/{task_id}")
-    public DatabaseResult listTaskSchedule(@PathVariable String task_id) {
-        return this.taskCreationDTORaceService.listTaskSchedule(task_id);
+
+    @GetMapping("/Task/list/{task_id}")
+    public DatabaseResult listTaskSchedule(@PathVariable String task_id,
+                                           @RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return this.taskCreationDTORaceService.listTaskSchedule(task_id, pageable);
     }
-*/
+
+    @GetMapping("/Task/count/{user_id}")
+    public DatabaseResult countTasksByUserId(@PathVariable String user_id) {
+        return this.taskCreationDTORaceService.countTasksByUserId(user_id);
+    }
+
     @DeleteMapping("/Task/{id}")
     public DatabaseResult deleteTaskSchedule(@PathVariable Long id) {
         return this.taskCreationDTORaceService.deleteTask(id);

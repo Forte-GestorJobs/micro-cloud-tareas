@@ -12,7 +12,6 @@ public class TaskSchedule {
     private String id;
     private Date startDate;
     private Date endDate;
-    private Date creationDate;
     private String scheduleExpression;
     private String timeZone;
 
@@ -28,7 +27,6 @@ public class TaskSchedule {
         this.id = id;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.creationDate = new Date();
         this.scheduleExpression = scheduleExpression;
         this.timeZone = timeZone;
         this.maximumTimeWindowInMinutes = maximumTimeWindowInMinutes;
@@ -56,14 +54,6 @@ public class TaskSchedule {
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
     }
 
     public String getScheduleExpression() {
@@ -104,7 +94,6 @@ public class TaskSchedule {
             return "{ \"id\": \"" + this.id + "\", " +
                     "\"startDate\": \"" + this.startDate + "\", " +
                     "\"endDate\": \"" + this.endDate + "\", " +
-                    "\"creationDate\": \"" + this.creationDate + "\", " +
                     "\"scheduleExpression\": \"" + this.scheduleExpression + "\", " +
                     "\"timeZone\": \"" + this.timeZone + "\", " +
                     "\"maximumTimeWindowInMinutes\": \"" + this.maximumTimeWindowInMinutes + "\", " +

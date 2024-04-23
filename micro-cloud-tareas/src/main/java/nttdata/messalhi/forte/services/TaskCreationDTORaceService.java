@@ -12,6 +12,8 @@ import nttdata.messalhi.forte.utils.ResultadoConsultaAWS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -110,6 +112,35 @@ public class TaskCreationDTORaceService {
 
         }
     }
+
+    public DatabaseResult listTaskSchedule(String task_id, Pageable pageable) {
+        try {
+            Page<TaskInfo> taskPage = this.taskInfoDAO.findByUserId(task_id, pageable);
+            if (taskPage.isEmpty()) {
+                return new DatabaseResult(false, "No tasks found for user: " + task_id);
+            } else {
+                List<String> taskList = new ArrayList<>();
+                for (TaskInfo task : taskPage.getContent()) {
+                    taskList.add(task.toStringJSON());
+                }
+                return new DatabaseResult(true, taskList.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new DatabaseResult(false, e.getMessage());
+        }
+    }
+
+    public DatabaseResult countTasksByUserId(String user_id) {
+        try {
+            long count = this.taskInfoDAO.countByUserId(user_id);
+            return new DatabaseResult(true, String.valueOf(count));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new DatabaseResult(false, e.getMessage());
+        }
+    }
+
     public DatabaseResult deleteTask(Long id) {
 
         try {
