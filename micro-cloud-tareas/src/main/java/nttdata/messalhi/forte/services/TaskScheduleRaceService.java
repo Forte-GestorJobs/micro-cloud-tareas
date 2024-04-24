@@ -73,7 +73,6 @@ public class TaskScheduleRaceService {
             String id = taskSchedule.getId();
             Date startDate = taskSchedule.getStartDate();
             Date endDate = taskSchedule.getEndDate();
-            Date creationDate = new Date();
             String scheduleExpression = taskSchedule.getScheduleExpression();
             String timeZone = taskSchedule.getTimeZone();
 
@@ -81,7 +80,6 @@ public class TaskScheduleRaceService {
                 TaskSchedule taskScheduleDB = taskScheduleDAO.getReferenceById(id);
                 taskScheduleDB.setStartDate(startDate);
                 taskScheduleDB.setEndDate(endDate);
-                taskScheduleDB.setCreationDate(creationDate);
                 taskScheduleDB.setScheduleExpression(scheduleExpression);
                 taskScheduleDB.setTimeZone(timeZone);
                 this.taskScheduleDAO.save(taskScheduleDB);
