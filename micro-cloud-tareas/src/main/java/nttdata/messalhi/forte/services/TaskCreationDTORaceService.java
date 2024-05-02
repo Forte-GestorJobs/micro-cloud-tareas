@@ -63,7 +63,6 @@ public class TaskCreationDTORaceService {
             TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone(), taskCreationDTO.getMaximumTimeWindowInMinutes());
             taskInfo.setTarget(taskDestination);
             taskInfo.setSchedule(taskSchedule);
-            taskSchedule.setTaskInfo(taskInfo);
 
             // Guardar AWS Schedule
             ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.createSchedule(taskInfo, buildInputAWS(taskInfo));
