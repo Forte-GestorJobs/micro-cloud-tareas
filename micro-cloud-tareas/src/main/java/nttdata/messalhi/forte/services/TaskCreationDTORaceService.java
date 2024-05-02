@@ -61,9 +61,8 @@ public class TaskCreationDTORaceService {
             TaskDestination taskDestination = new TaskDestination(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getUrl(), taskCreationDTO.getHttpMethod(), taskCreationDTO.getBody());
             TaskInfo taskInfo = new TaskInfo(taskCreationDTO.getName(), taskCreationDTO.getDescription(), taskCreationDTO.getState(), taskCreationDTO.getUserId());
             TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone(), taskCreationDTO.getMaximumTimeWindowInMinutes());
-            taskInfo.setTarget(taskDestination);
+            taskInfo.setDestination(taskDestination);
             taskInfo.setSchedule(taskSchedule);
-            taskSchedule.setTaskInfo(taskInfo);
 
             // Guardar AWS Schedule
             ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.createSchedule(taskInfo, buildInputAWS(taskInfo));
@@ -184,7 +183,7 @@ public class TaskCreationDTORaceService {
                 taskInfo.setDescription(taskCreationDTO.getDescription());
                 taskInfo.setState(taskCreationDTO.getState());
 
-                TaskDestination taskDestination = taskInfo.getTarget();
+                TaskDestination taskDestination = taskInfo.getDestination();
                 taskDestination.setUrl(taskCreationDTO.getUrl());
                 taskDestination.setHttpMethod(taskCreationDTO.getHttpMethod());
                 taskDestination.setBody(taskCreationDTO.getBody());
@@ -224,9 +223,9 @@ public class TaskCreationDTORaceService {
         Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put("user_id", taskInfo.getName());
         jsonMap.put("schedule_id", taskInfo.getUserId() + "." + taskInfo.getName());
-        jsonMap.put("url", taskInfo.getTarget().getUrl());
-        jsonMap.put("http_method", taskInfo.getTarget().getHttpMethod());
-        jsonMap.put("body", taskInfo.getTarget().getBody());
+        jsonMap.put("url", taskInfo.getDestination().getUrl());
+        jsonMap.put("http_method", taskInfo.getDestination().getHttpMethod());
+        jsonMap.put("body", taskInfo.getDestination().getBody());
 
         // Convertir la fecha a una cadena en el formato deseado
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");

@@ -3,7 +3,6 @@ package nttdata.messalhi.forte.http;
 
 import nttdata.messalhi.forte.auxi.TaskCreationDTO;
 import nttdata.messalhi.forte.services.TaskCreationDTORaceService;
-import nttdata.messalhi.forte.utils.DatabaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,17 +25,12 @@ public class TaskCreationDTORaceController {
         return this.taskCreationDTORaceService.getTask(id);
     }
 
-    @GetMapping("/Task/2")
-    public ResponseEntity<String> get(){
-        return ResponseEntity.ok("Hello");
-
-    }
-    @GetMapping("/Task/list/{task_id}")
-    public ResponseEntity<String> listTaskSchedule(@PathVariable String task_id,
+    @GetMapping("/Task/list/{user_id}")
+    public ResponseEntity<String> listTaskByUserId(@PathVariable String user_id,
                                            @RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return this.taskCreationDTORaceService.listTaskSchedule(task_id, pageable);
+        return this.taskCreationDTORaceService.listTaskSchedule(user_id, pageable);
     }
     @GetMapping("/Task/count/{user_id}")
     public ResponseEntity<String> countTasksByUserId(@PathVariable String user_id) {
