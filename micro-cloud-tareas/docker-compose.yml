@@ -15,7 +15,6 @@ services:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
 
-  # Definición del servicio para la imagen pruebamct
   pruebamct:
     #build:
       #context: .
@@ -23,13 +22,13 @@ services:
     image: ghcr.io/forte-gestorjobs/micro-cloud-tareas:latest
     environment:
       MCT_DBHOST: testdb
-      MCT_DBNAME: testdb
-      MCT_DBPORT: 5432
-      MCT_DBPWD: 123
-      MCT_DBUSER: postgres
-      AWS_ACCESS_KEY_ID: AKIATXSB4LWL4RQMWK7W
-      AWS_SECRET_KEY: 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
-      AWS_REGION: eu-west-2
+      MCT_DBNAME: ${MCT_DBNAME}
+      MCT_DBPORT: 5432 
+      MCT_DBPWD: ${MCT_DBPWD}
+      MCT_DBUSER: ${MCT_DBUSER}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+      AWS_REGION: ${AWS_REGION}
     ports:
       - "8082:8082"
     depends_on:
