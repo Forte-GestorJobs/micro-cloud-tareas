@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Definición del servicio para la base de datos PostgreSQL
+  testdb:
+    image: postgres:15.1-alpine
+    container_name: testdb2
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_USER: postgres
+      POSTGRES_DB: testdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Definición del servicio para la imagen pruebamct
+  pruebamct:
+    #build:
+      #context: .
+      #dockerfile: Dockerfile
+    image: ghcr.io/forte-gestorjobs/micro-cloud-tareas:latest
+    environment:
+      MCT_DBHOST: testdb
+      MCT_DBNAME: testdb
+      MCT_DBPORT: 5432
+      MCT_DBPWD: 123
+      MCT_DBUSER: postgres
+      AWS_ACCESS_KEY_ID: AKIATXSB4LWL4RQMWK7W
+      AWS_SECRET_KEY: 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
+      AWS_REGION: eu-west-2
+    ports:
+      - "8082:8082"
+    depends_on:
+      - testdb
+    volumes:
+      - /tmp
+    restart: unless-stopped
+
+volumes:
+  pgdata:
