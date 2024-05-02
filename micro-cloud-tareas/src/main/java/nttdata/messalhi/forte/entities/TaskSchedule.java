@@ -17,6 +17,10 @@ public class TaskSchedule {
 
     private int maximumTimeWindowInMinutes;
 
+    @ManyToOne
+    @JoinColumn(name = "taskinfo_id")
+    private TaskInfo taskInfo;
+
     public TaskSchedule() {
     }
 
@@ -77,6 +81,14 @@ public class TaskSchedule {
         this.maximumTimeWindowInMinutes = maximumTimeWindowInMinutes;
     }
 
+    public TaskInfo getTaskInfo() {
+        return taskInfo;
+    }
+
+    public void setTaskInfo(TaskInfo taskInfo) {
+        this.taskInfo = taskInfo;
+    }
+
     public String toStringJSON() {
         try {
             return "{ \"id\": \"" + this.id + "\", " +
@@ -84,7 +96,8 @@ public class TaskSchedule {
                     "\"endDate\": \"" + this.endDate + "\", " +
                     "\"scheduleExpression\": \"" + this.scheduleExpression + "\", " +
                     "\"timeZone\": \"" + this.timeZone + "\", " +
-                    "\"maximumTimeWindowInMinutes\": \"" + this.maximumTimeWindowInMinutes + "\" }";
+                    "\"maximumTimeWindowInMinutes\": \"" + this.maximumTimeWindowInMinutes + "\", " +
+                    "\"taskId\": \"" + this.taskInfo.getId() + "\" }";
         } catch (Exception e) {
             e.printStackTrace();
             return "{}";
