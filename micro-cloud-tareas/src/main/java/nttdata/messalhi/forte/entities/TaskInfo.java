@@ -20,7 +20,7 @@ public class TaskInfo {
     private String userId;
 
     @OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
-    private TaskDestination target;
+    private TaskDestination destination;
 
     @OneToOne(mappedBy = "taskInfo", optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
     private TaskSchedule schedule;
@@ -101,12 +101,12 @@ public class TaskInfo {
         this.userId = userId;
     }
 
-    public TaskDestination getTarget() {
-        return target;
+    public TaskDestination getDestination() {
+        return destination;
     }
 
-    public void setTarget(TaskDestination target) {
-        this.target = target;
+    public void setDestination(TaskDestination destination) {
+        this.destination = destination;
     }
 
     public TaskSchedule getSchedule() {
@@ -128,7 +128,7 @@ public class TaskInfo {
             jsonBuilder.append("\"creationDate\": \"").append(this.creationDate).append("\", ");
             jsonBuilder.append("\"lastModification\": \"").append(this.lastModification).append("\", ");
             jsonBuilder.append("\"userId\": \"").append(this.userId).append("\", ");
-            jsonBuilder.append("\"target\": ").append(this.target.toStringJSON()).append(", ");
+            jsonBuilder.append("\"destination\": ").append(this.destination.toStringJSON()).append(", ");
             jsonBuilder.append("\"schedule\": ").append(this.schedule.toStringJSON()).append("}");
             return jsonBuilder.toString();
         } catch (Exception e) {
