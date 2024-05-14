@@ -30,7 +30,7 @@ jobs:
         run: echo "${{ secrets.CRT }}" > Zscaler_Root_CA.crt
         working-directory: micro-cloud-tareas
       
-      - name: Construir crt del servidor
+      - name: Construir crt del servidor 
         run: echo ${{ secrets.B64_CERT }} | base64 --decode > src/main/resources/local-ssl.p12
         working-directory: micro-cloud-tareas
 
