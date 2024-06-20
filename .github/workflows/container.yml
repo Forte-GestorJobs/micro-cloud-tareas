@@ -29,9 +29,9 @@ jobs:
       - name: Crear archivo Zscaler_Root_CA.crt
         run: echo "${{ secrets.CRT }}" > Zscaler_Root_CA.crt
         working-directory: micro-cloud-tareas
-        
-      - name: Comprobar fichero
-        run: ls
+      
+      - name: Construir crt del servidor 
+        run: echo ${{ secrets.B64_CERT }} | base64 --decode > src/main/resources/local-ssl.p12
         working-directory: micro-cloud-tareas
 
       - name: Construir con Maven
