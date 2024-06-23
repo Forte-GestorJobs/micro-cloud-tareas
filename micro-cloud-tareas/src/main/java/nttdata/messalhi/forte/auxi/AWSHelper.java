@@ -3,35 +3,40 @@ package nttdata.messalhi.forte.auxi;
 import com.amazonaws.services.scheduler.AmazonScheduler;
 import com.amazonaws.services.scheduler.AmazonSchedulerClientBuilder;
 import com.amazonaws.services.scheduler.model.*;
+
+import nttdata.messalhi.forte.entities.Task;
 import nttdata.messalhi.forte.entities.TaskInfo;
+import nttdata.messalhi.forte.entities.TaskSchedule;
 import nttdata.messalhi.forte.utils.ResultadoConsultaAWS;
 
 public class AWSHelper {
     private AWSHelper(){}
-    public static ResultadoConsultaAWS createSchedule(TaskInfo taskInfo, String input){
+    public static ResultadoConsultaAWS createSchedule(Task task, String input){
         try {
             AmazonScheduler amazonScheduler = AmazonSchedulerClientBuilder.defaultClient();
             FlexibleTimeWindow flexibleTimeWindow;
-            if (taskInfo.getSchedule().getMaximumTimeWindowInMinutes() == 0){
+            TaskSchedule taskSchedule = task.getTaskSchedule().get(task.getTaskSchedule().size()-1);
+            TaskInfo taskInfo = task.getTaskInfo().get(task.getTaskInfo().size()-1);
+            if (taskSchedule.getMaximumTimeWindowInMinutes() == 0){
                 flexibleTimeWindow = new FlexibleTimeWindow().withMode("OFF");
             }
             else{
-                flexibleTimeWindow = new FlexibleTimeWindow().withMode("FLEXIBLE").withMaximumWindowInMinutes(taskInfo.getSchedule().getMaximumTimeWindowInMinutes());
+                flexibleTimeWindow = new FlexibleTimeWindow().withMode("FLEXIBLE").withMaximumWindowInMinutes(taskSchedule.getMaximumTimeWindowInMinutes());
             }
             Target target = new Target()
                     .withArn("arn:aws:lambda:eu-west-2:256762469783:function:write-event-db")
                     .withRoleArn("arn:aws:iam::256762469783:role/demo_rol_eb_y_lambda")
                     .withInput(input);
             CreateScheduleRequest request = new CreateScheduleRequest()
-                    .withName(taskInfo.getUserId() + "." + taskInfo.getName())
+                    .withName(task.getUserId() + "." + task.getName())
                     .withDescription(taskInfo.getDescription())
-                    .withScheduleExpression(taskInfo.getSchedule().getScheduleExpression())
+                    .withScheduleExpression(taskSchedule.getScheduleExpression())
                     .withState(taskInfo.getState())
                     .withFlexibleTimeWindow(flexibleTimeWindow)
                     .withTarget(target)
-                    .withScheduleExpressionTimezone(taskInfo.getSchedule().getTimeZone())
-                    .withStartDate(taskInfo.getSchedule().getStartDate())
-                    .withEndDate(taskInfo.getSchedule().getEndDate())
+                    .withScheduleExpressionTimezone(taskSchedule.getTimeZone())
+                    .withStartDate(taskSchedule.getStartDate())
+                    .withEndDate(taskSchedule.getEndDate())
                     ;
 
             CreateScheduleResult result = amazonScheduler.createSchedule(request);

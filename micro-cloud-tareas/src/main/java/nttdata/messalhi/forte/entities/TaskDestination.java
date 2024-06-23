@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -15,15 +17,21 @@ public class TaskDestination {
     private String url;
     private String httpMethod;
     private String body;
+    private int version;
+
+    @ManyToOne
+    @JoinColumn(name = "task_id")
+    private Task task;
 
     public TaskDestination() {
     }
 
-    public TaskDestination(String id, String url, String httpMethod, String body) {
+    public TaskDestination(String id, String url, String httpMethod, String body, int version) {
         this.id = id;
         this.url = url;
         this.httpMethod = httpMethod;
         this.body = body;
+        this.version = version;
     }
 
     public String getId() {
@@ -58,13 +66,35 @@ public class TaskDestination {
         this.body = body;
     }
 
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
     public String toStringJSON() {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
+            StringBuilder jsonBuilder = new StringBuilder("{");
+            jsonBuilder.append("\"id\": \"").append(this.id).append("\", ");
+            jsonBuilder.append("\"version\": \"").append(this.version).append("\", ");
+            jsonBuilder.append("\"url\": \"").append(this.url).append("\", ");
+            jsonBuilder.append("\"httpMethod\": \"").append(this.httpMethod).append("\", ");
+            jsonBuilder.append("\"body\": \"").append(this.body).append("\"}");
+            return jsonBuilder.toString();
+        } catch (Exception e) {
             e.printStackTrace();
-            return "{}"; // Manejo de errores
+            return "{}";
         }
     }
+
 }

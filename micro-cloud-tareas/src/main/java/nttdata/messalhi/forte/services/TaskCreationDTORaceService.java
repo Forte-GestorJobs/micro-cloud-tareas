@@ -2,8 +2,10 @@ package nttdata.messalhi.forte.services;
 
 
 import nttdata.messalhi.forte.auxi.AWSHelper;
+import nttdata.messalhi.forte.dao.TaskDAO;
 import nttdata.messalhi.forte.dao.TaskInfoDAO;
 import nttdata.messalhi.forte.auxi.TaskCreationDTO;
+import nttdata.messalhi.forte.entities.Task;
 import nttdata.messalhi.forte.entities.TaskDestination;
 import nttdata.messalhi.forte.entities.TaskInfo;
 import nttdata.messalhi.forte.entities.TaskSchedule;
@@ -35,12 +37,12 @@ public class TaskCreationDTORaceService {
 
 
     @Autowired
-    private TaskInfoDAO taskInfoDAO;
+    private TaskDAO taskDAO;
 
     Logger logger = LoggerFactory.getLogger(TaskCreationDTORaceService.class);
 
-    public boolean existsTaskInfo(Long id) {
-        Optional<TaskInfo> optUser = this.taskInfoDAO.findById(id);
+    public boolean existsTask(Long id) {
+        Optional<Task> optUser = this.taskDAO.findById(id);
         return optUser.isPresent();
     }
 
@@ -58,38 +60,27 @@ public class TaskCreationDTORaceService {
             if (!validTimeZones.contains(taskCreationDTO.getTimeZone())){
                 return new DatabaseResult(false, "Invalid TimeZone: " + taskCreationDTO.getTimeZone()).response();
             }
-            TaskDestination taskDestination = new TaskDestination(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getUrl(), taskCreationDTO.getHttpMethod(), taskCreationDTO.getBody());
-            TaskInfo taskInfo = new TaskInfo(taskCreationDTO.getName(), taskCreationDTO.getDescription(), taskCreationDTO.getState(), taskCreationDTO.getUserId());
-            TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone(), taskCreationDTO.getMaximumTimeWindowInMinutes());
-            taskInfo.setDestination(taskDestination);
-            taskInfo.setSchedule(taskSchedule);
-            taskSchedule.setTaskInfo(taskInfo);
-            // Guardar AWS Schedule
-            ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.createSchedule(taskInfo, buildInputAWS(taskInfo));
+            TaskDestination taskDestination = new TaskDestination(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getUrl(), taskCreationDTO.getHttpMethod(), taskCreationDTO.getBody(), 1);
+            TaskInfo taskInfo = new TaskInfo(taskCreationDTO.getDescription(), taskCreationDTO.getState(), 1);
+            TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone(), taskCreationDTO.getMaximumTimeWindowInMinutes(), 1);
+            
+
+            if (taskDAO.findByNameAndUserId(taskCreationDTO.getName(), taskCreationDTO.getUserId()).isPresent()){
+                return new DatabaseResult(false, "Ya existe una tarea con ese nombre para ese usuario").response();
+            }
+
+            Task task = new Task(taskCreationDTO.getName(), taskCreationDTO.getUserId());
+            task.addTaskDestination(taskDestination);
+            task.addTaskInfo(taskInfo);
+            task.addTaskSchedule(taskSchedule);
+
+            ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.createSchedule(task, buildInputAWS(task));
             if (!resultadoConsultaAWS.isSuccess()) {
-                return new DatabaseResult(false, "Error creating AWS Schedule: " + resultadoConsultaAWS.getMessage()).response();
+                return new DatabaseResult(false, "Error creando la tarea en AWS: " + resultadoConsultaAWS.getMessage()).response();
             }
-
-            // Guardar TaskInfo TaskSchedule y TaskDestination
-            taskInfo.setArn(resultadoConsultaAWS.getMessage());
-            DatabaseResult resultTI = taskInfoRaceService.addTaskInfo(taskInfo);
-            if (!resultTI.isSuccess()) {
-                return new DatabaseResult(false, "Error creating TaskInfo: " + resultTI.getMessage()).response();
-            }
-
-            // Guardar TaskDestination
-            //DatabaseResult resultTD = taskDestinationRaceService.addTaskDestination(taskDestination);
-            //if (!resultTD.isSuccess()) {
-            //    return new DatabaseResult(false, "Error creating TaskDestination: " + resultTD.getMessage());
-            //}
-
-            // Crear TaskSchedule
-            //DatabaseResult resultTS = taskScheduleRaceService.addTaskSchedule(taskSchedule);
-            //if (!resultTS.isSuccess()) {
-            //    return new DatabaseResult(false, "Error creating TaskSchedule: " + resultTS.getMessage());
-            //}
-
-            return new DatabaseResult(true, taskClass + taskInfo.getId() + " created successfully").response();
+            task.setArn(resultadoConsultaAWS.getMessage());
+            taskDAO.save(task);
+            return new DatabaseResult(true, taskClass + task.getId() + " created successfully").response();
         } catch (Exception e) {
             e.printStackTrace();
             return new DatabaseResult(false, "Error: " + e.getMessage()).response();
@@ -99,12 +90,12 @@ public class TaskCreationDTORaceService {
 
     public ResponseEntity<String> getTask(Long id){
         try{
-            if (existsTaskInfo(id)) {
-                TaskInfo taskInfo = this.taskInfoDAO.getReferenceById(id);
-                return new DatabaseResult(true, taskInfo.toStringJSON()).response(); // Operación exitosa
+            if (existsTask(id)) {
+                Task task = this.taskDAO.getReferenceById(id);
+                return new DatabaseResult(true, task.toStringJSON()).response(); 
             }
             else{
-                return new DatabaseResult(false, taskClass + "with arn: " + id + " not found").response();
+                return new DatabaseResult(false, taskClass + "with id: " + id + " not found").response();
             }
         } catch (Exception e){
             e.printStackTrace();
@@ -115,12 +106,12 @@ public class TaskCreationDTORaceService {
 
     public ResponseEntity<String> listTaskSchedule(String task_id, Pageable pageable) {
         try {
-            Page<TaskInfo> taskPage = this.taskInfoDAO.findByUserId(task_id, pageable);
+            Page<Task> taskPage = this.taskDAO.findByUserId(task_id, pageable);
             if (taskPage.isEmpty()) {
                 return new DatabaseResult(false, "No tasks found for user: " + task_id).response();
             } else {
                 List<String> taskList = new ArrayList<>();
-                for (TaskInfo task : taskPage.getContent()) {
+                for (Task task : taskPage.getContent()) {
                     taskList.add(task.toStringJSON());
                 }
                 return new DatabaseResult(true, taskList.toString()).response();
@@ -133,7 +124,7 @@ public class TaskCreationDTORaceService {
 
     public ResponseEntity<String> countTasksByUserId(String user_id) {
         try {
-            long count = this.taskInfoDAO.countByUserId(user_id);
+            long count = this.taskDAO.countByUserId(user_id);
             return new DatabaseResult(true, String.valueOf(count)).response();
         } catch (Exception e) {
             e.printStackTrace();
@@ -144,13 +135,13 @@ public class TaskCreationDTORaceService {
     public ResponseEntity<String> deleteTask(Long id) {
 
         try {
-            if (existsTaskInfo(id)) {
-                TaskInfo taskInfo = this.taskInfoDAO.getReferenceById(id);
-                ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.deleteSchedule(taskInfo.getUserId()+ "." + taskInfo.getName());
+            if (existsTask(id)) {
+                Task task = this.taskDAO.getReferenceById(id);
+                ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.deleteSchedule(task.getUserId()+ "." + task.getName());
                 if (!resultadoConsultaAWS.isSuccess()) {
                     return new DatabaseResult(false, "Error deleting AWS Schedule: " + resultadoConsultaAWS.getMessage()).response();
                 }
-                this.taskInfoDAO.deleteById(id);
+                this.taskDAO.deleteById(id);
                 return new DatabaseResult(true, taskClass + id + " deleted").response();
             }
             return new DatabaseResult(true, taskClass + id + " deleted").response();
@@ -169,7 +160,7 @@ public class TaskCreationDTORaceService {
         );
         try {
             // Buscar la tarea existente por su ID
-            if (!existsTaskInfo(taskId)) {
+            if (!existsTask(taskId)) {
                 return new DatabaseResult(false, "Task not found with ID: " + taskId).response();
             }
             else{
@@ -179,32 +170,23 @@ public class TaskCreationDTORaceService {
                 if (!validTimeZones.contains(taskCreationDTO.getTimeZone())){
                     return new DatabaseResult(false, "Invalid TimeZone: " + taskCreationDTO.getTimeZone()).response();
                 }
-                TaskInfo taskInfo = taskInfoDAO.getReferenceById(taskId);
-                taskInfo.setDescription(taskCreationDTO.getDescription());
-                taskInfo.setState(taskCreationDTO.getState());
+                Task task = taskDAO.getReferenceById(taskId);
+                int version = generateVersion(task);
+                TaskDestination taskDestination = new TaskDestination(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getUrl(), taskCreationDTO.getHttpMethod(), taskCreationDTO.getBody(), version);
+                TaskInfo taskInfo = new TaskInfo(taskCreationDTO.getDescription(), taskCreationDTO.getState(), version);
+                TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone(), taskCreationDTO.getMaximumTimeWindowInMinutes(), version);
+                
+                task.addTaskDestination(taskDestination);
+                task.addTaskInfo(taskInfo);
+                task.addTaskSchedule(taskSchedule);
+                
 
-                TaskDestination taskDestination = taskInfo.getDestination();
-                taskDestination.setUrl(taskCreationDTO.getUrl());
-                taskDestination.setHttpMethod(taskCreationDTO.getHttpMethod());
-                taskDestination.setBody(taskCreationDTO.getBody());
-
-                TaskSchedule taskSchedule = taskInfo.getSchedule();
-                taskSchedule.setScheduleExpression(taskCreationDTO.getScheduleExpression());
-                taskSchedule.setStartDate(taskCreationDTO.getStartDate());
-                taskSchedule.setEndDate(taskCreationDTO.getEndDate());
-                taskSchedule.setTimeZone(taskCreationDTO.getTimeZone());
-                taskSchedule.setMaximumTimeWindowInMinutes(taskCreationDTO.getMaximumTimeWindowInMinutes());
-
-                ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.updateSchedule(taskInfo.getUserId()+"."+taskInfo.getName(), taskCreationDTO.getDescription(), taskCreationDTO.getState(),taskCreationDTO.getScheduleExpression(), taskCreationDTO.getMaximumTimeWindowInMinutes());
+                ResultadoConsultaAWS resultadoConsultaAWS = AWSHelper.updateSchedule(task.getUserId()+"."+task.getName(), taskCreationDTO.getDescription(), taskCreationDTO.getState(),taskCreationDTO.getScheduleExpression(), taskCreationDTO.getMaximumTimeWindowInMinutes());
                 logger.debug(String.format("Resultado update AWS: %s", resultadoConsultaAWS.getMessage()));
                 if (!resultadoConsultaAWS.isSuccess()) {
                     return new DatabaseResult(false, "Error updating AWS Schedule: " + resultadoConsultaAWS.getMessage()).response();
                 }
-                DatabaseResult result = taskInfoRaceService.updateTaskInfo(taskInfo);
-                if (!result.isSuccess()) {
-                    return new DatabaseResult(false, "Error updating Task: " + result.getMessage()).response();
-                }
-
+                taskDAO.save(task);
                 return new DatabaseResult(true, "Task " + taskId + " updated successfully").response();
             }
         } catch (Exception e) {
@@ -215,17 +197,17 @@ public class TaskCreationDTORaceService {
 
 
 
-    public String buildInputAWS(TaskInfo taskInfo) throws JsonProcessingException {
+    public String buildInputAWS(Task task) throws JsonProcessingException {
         // Crear un objeto ObjectMapper para convertir objetos Java a JSON
         ObjectMapper objectMapper = new ObjectMapper();
-
+        TaskDestination taskDestination = task.getTaskDestination().get(task.getTaskDestination().size()-1);
         // Construir un mapa para representar el JSON
         Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("user_id", taskInfo.getName());
-        jsonMap.put("schedule_id", taskInfo.getUserId() + "." + taskInfo.getName());
-        jsonMap.put("url", taskInfo.getDestination().getUrl());
-        jsonMap.put("http_method", taskInfo.getDestination().getHttpMethod());
-        jsonMap.put("body", taskInfo.getDestination().getBody());
+        jsonMap.put("user_id", task.getName());
+        jsonMap.put("schedule_id", task.getUserId() + "." + task.getName());
+        jsonMap.put("url", taskDestination.getUrl());
+        jsonMap.put("http_method", taskDestination.getHttpMethod());
+        jsonMap.put("body", taskDestination.getBody());
 
         // Convertir la fecha a una cadena en el formato deseado
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -237,7 +219,8 @@ public class TaskCreationDTORaceService {
 
         return jsonInput;
     }
-
-
-
+    public int generateVersion(Task task){
+        int actual_version = task.getTaskInfo().get(task.getTaskInfo().size()-1).getVersion();
+        return actual_version+1;
+    }
 }

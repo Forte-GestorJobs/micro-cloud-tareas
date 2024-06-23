@@ -14,23 +14,24 @@ public class TaskSchedule {
     private Date endDate;
     private String scheduleExpression;
     private String timeZone;
-
+    private int version;
     private int maximumTimeWindowInMinutes;
 
     @ManyToOne
-    @JoinColumn(name = "taskinfo_id")
-    private TaskInfo taskInfo;
+    @JoinColumn(name = "task_id")
+    private Task task;
 
     public TaskSchedule() {
     }
 
-    public TaskSchedule(String id, Date startDate, Date endDate, String scheduleExpression, String timeZone, int maximumTimeWindowInMinutes) {
+    public TaskSchedule(String id, Date startDate, Date endDate, String scheduleExpression, String timeZone, int maximumTimeWindowInMinutes, int version) {
         this.id = id;
         this.startDate = startDate;
         this.endDate = endDate;
         this.scheduleExpression = scheduleExpression;
         this.timeZone = timeZone;
         this.maximumTimeWindowInMinutes = maximumTimeWindowInMinutes;
+        this.version = version;
     }
 
     public String getId() {
@@ -81,26 +82,38 @@ public class TaskSchedule {
         this.maximumTimeWindowInMinutes = maximumTimeWindowInMinutes;
     }
 
-    public TaskInfo getTaskInfo() {
-        return taskInfo;
+    public Task getTask() {
+        return task;
     }
 
-    public void setTaskInfo(TaskInfo taskInfo) {
-        this.taskInfo = taskInfo;
+    public void setTask(Task task) {
+        this.task = task;
     }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
 
     public String toStringJSON() {
         try {
-            return "{ \"id\": \"" + this.id + "\", " +
-                    "\"startDate\": \"" + this.startDate + "\", " +
-                    "\"endDate\": \"" + this.endDate + "\", " +
-                    "\"scheduleExpression\": \"" + this.scheduleExpression + "\", " +
-                    "\"timeZone\": \"" + this.timeZone + "\", " +
-                    "\"maximumTimeWindowInMinutes\": \"" + this.maximumTimeWindowInMinutes + "\", " +
-                    "\"taskId\": \"" + this.taskInfo.getId() + "\" }";
+            StringBuilder jsonBuilder = new StringBuilder("{");
+            jsonBuilder.append("\"id\": \"").append(this.id).append("\", ");
+            jsonBuilder.append("\"version\": \"").append(this.version).append("\", ");
+            jsonBuilder.append("\"startDate\": \"").append(this.startDate).append("\", ");
+            jsonBuilder.append("\"endDate\": \"").append(this.endDate).append("\", ");
+            jsonBuilder.append("\"scheduleExpression\": \"").append(this.scheduleExpression).append("\", ");
+            jsonBuilder.append("\"timeZone\": \"").append(this.timeZone).append("\", ");
+            jsonBuilder.append("\"maximumTimeWindowInMinutes\": \"").append(this.maximumTimeWindowInMinutes).append("\"} ");
+            return jsonBuilder.toString();
         } catch (Exception e) {
             e.printStackTrace();
             return "{}";
         }
     }
+    
 }
