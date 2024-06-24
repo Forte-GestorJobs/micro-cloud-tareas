@@ -11,30 +11,21 @@ public class TaskInfo {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_generator")
     @SequenceGenerator(name="id_generator", sequenceName = "id_seq", initialValue = 100000, allocationSize = 1)
     private Long id;
-    private String arn;
-    private String name;
     private String description;
     private String state;
-    private Date creationDate;
-    private Date lastModification;
-    private String userId;
+    private int version;
 
-    @OneToOne(optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
-    private TaskDestination destination;
-
-    @OneToOne(mappedBy = "taskInfo", optional = false, cascade = CascadeType.ALL, orphanRemoval = true)
-    private TaskSchedule schedule;
+    @ManyToOne
+    @JoinColumn(name = "task_id")
+    private Task task;
 
     public TaskInfo() {
     }
 
-    public TaskInfo(String name, String description, String state, String userId) {
-        this.name = name;
+    public TaskInfo(String description, String state, int version) {
         this.description = description;
         this.state = state;
-        this.userId = userId;
-        this.creationDate = new Date();
-        this.lastModification = new Date();
+        this.version = version;
     }
 
     public Long getId() {
@@ -43,22 +34,6 @@ public class TaskInfo {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getArn() {
-        return arn;
-    }
-
-    public void setArn(String arn) {
-        this.arn = arn;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getDescription() {
@@ -77,63 +52,33 @@ public class TaskInfo {
         this.state = state;
     }
 
-    public Date getCreationDate() {
-        return creationDate;
+    public Task getTask() {
+        return task;
     }
 
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
+    public void setTask(Task task) {
+        this.task = task;
     }
 
-    public Date getLastModification() {
-        return lastModification;
+    public int getVersion() {
+        return version;
     }
 
-    public void setLastModification(Date lastModification) {
-        this.lastModification = lastModification;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public TaskDestination getDestination() {
-        return destination;
-    }
-
-    public void setDestination(TaskDestination destination) {
-        this.destination = destination;
-    }
-
-    public TaskSchedule getSchedule() {
-        return schedule;
-    }
-
-    public void setSchedule(TaskSchedule schedule) {
-        this.schedule = schedule;
+    public void setVersion(int version) {
+        this.version = version;
     }
 
     public String toStringJSON() {
         try {
             StringBuilder jsonBuilder = new StringBuilder("{");
             jsonBuilder.append("\"id\": \"").append(this.id).append("\", ");
-            jsonBuilder.append("\"arn\": \"").append(this.arn).append("\", ");
-            jsonBuilder.append("\"name\": \"").append(this.name).append("\", ");
+            jsonBuilder.append("\"version\": \"").append(this.version).append("\", ");
             jsonBuilder.append("\"description\": \"").append(this.description).append("\", ");
-            jsonBuilder.append("\"state\": \"").append(this.state).append("\", ");
-            jsonBuilder.append("\"creationDate\": \"").append(this.creationDate).append("\", ");
-            jsonBuilder.append("\"lastModification\": \"").append(this.lastModification).append("\", ");
-            jsonBuilder.append("\"userId\": \"").append(this.userId).append("\", ");
-            jsonBuilder.append("\"destination\": ").append(this.destination.toStringJSON()).append(", ");
-            jsonBuilder.append("\"schedule\": ").append(this.schedule.toStringJSON()).append("}");
+            jsonBuilder.append("\"state\": \"").append(this.state).append("\"}");
             return jsonBuilder.toString();
         } catch (Exception e) {
             e.printStackTrace();
-            return "{}"; // Manejo de errores
+            return "{}"; 
         }
     }
 

@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TaskDestinationDAO extends JpaRepository<TaskDestination, String> {
+public interface TaskDestinationDAO extends JpaRepository<TaskDestination, Long> {
 }

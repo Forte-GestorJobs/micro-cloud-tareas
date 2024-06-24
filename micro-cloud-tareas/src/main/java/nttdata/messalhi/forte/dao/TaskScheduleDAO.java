@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface TaskScheduleDAO extends JpaRepository<TaskSchedule, String> {
-    Optional<TaskSchedule> findById(String id);
+public interface TaskScheduleDAO extends JpaRepository<TaskSchedule, Long> {
+    Optional<TaskSchedule> findById(Long id);
 }

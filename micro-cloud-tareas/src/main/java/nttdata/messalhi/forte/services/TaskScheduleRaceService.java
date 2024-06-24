@@ -16,14 +16,14 @@ public class TaskScheduleRaceService {
     @Autowired
     private TaskScheduleDAO taskScheduleDAO;
 
-    public boolean existsTaskSchedule(String id) {
+    public boolean existsTaskSchedule(Long id) {
         Optional<TaskSchedule> optUser = this.taskScheduleDAO.findById(id);
         return optUser.isPresent();
     }
 
     public DatabaseResult addTaskSchedule(TaskSchedule taskSchedule) {
         try{
-            String id = taskSchedule.getId();
+            Long id = taskSchedule.getId();
             if (existsTaskSchedule(id)){
                 return new DatabaseResult(false, taskScheduleClass + "already exists");
             }
@@ -37,7 +37,7 @@ public class TaskScheduleRaceService {
         }
     }
 
-    public DatabaseResult getTaskSchedule(String id) {
+    public DatabaseResult getTaskSchedule(Long id) {
         try {
             if (existsTaskSchedule(id)) {
                 TaskSchedule taskSchedule = this.taskScheduleDAO.getReferenceById(id);
@@ -56,7 +56,7 @@ public class TaskScheduleRaceService {
         return null;
     }
 
-    public DatabaseResult deleteTaskSchedule(String id) {
+    public DatabaseResult deleteTaskSchedule(Long id) {
         try {
             if (existsTaskSchedule(id)) {
                 this.taskScheduleDAO.deleteById(id);
@@ -70,7 +70,7 @@ public class TaskScheduleRaceService {
 
     public DatabaseResult updateTaskSchedule(TaskSchedule taskSchedule) { //Es necesario??
         try {
-            String id = taskSchedule.getId();
+            Long id = taskSchedule.getId();
             Date startDate = taskSchedule.getStartDate();
             Date endDate = taskSchedule.getEndDate();
             String scheduleExpression = taskSchedule.getScheduleExpression();
