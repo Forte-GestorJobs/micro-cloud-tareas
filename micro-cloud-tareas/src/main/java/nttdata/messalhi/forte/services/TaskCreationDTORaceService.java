@@ -60,9 +60,9 @@ public class TaskCreationDTORaceService {
             if (!validTimeZones.contains(taskCreationDTO.getTimeZone())){
                 return new DatabaseResult(false, "Invalid TimeZone: " + taskCreationDTO.getTimeZone()).response();
             }
-            TaskDestination taskDestination = new TaskDestination(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getUrl(), taskCreationDTO.getHttpMethod(), taskCreationDTO.getBody(), 1);
+            TaskDestination taskDestination = new TaskDestination(taskCreationDTO.getUrl(), taskCreationDTO.getHttpMethod(), taskCreationDTO.getBody(), 1);
             TaskInfo taskInfo = new TaskInfo(taskCreationDTO.getDescription(), taskCreationDTO.getState(), 1);
-            TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone(), taskCreationDTO.getMaximumTimeWindowInMinutes(), 1);
+            TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone(), taskCreationDTO.getMaximumTimeWindowInMinutes(), 1);
             
 
             if (taskDAO.findByNameAndUserId(taskCreationDTO.getName(), taskCreationDTO.getUserId()).isPresent()){
@@ -172,9 +172,9 @@ public class TaskCreationDTORaceService {
                 }
                 Task task = taskDAO.getReferenceById(taskId);
                 int version = generateVersion(task);
-                TaskDestination taskDestination = new TaskDestination(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getUrl(), taskCreationDTO.getHttpMethod(), taskCreationDTO.getBody(), version);
+                TaskDestination taskDestination = new TaskDestination(taskCreationDTO.getUrl(), taskCreationDTO.getHttpMethod(), taskCreationDTO.getBody(), version);
                 TaskInfo taskInfo = new TaskInfo(taskCreationDTO.getDescription(), taskCreationDTO.getState(), version);
-                TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getUserId()+"."+taskCreationDTO.getName(), taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone(), taskCreationDTO.getMaximumTimeWindowInMinutes(), version);
+                TaskSchedule taskSchedule = new TaskSchedule(taskCreationDTO.getStartDate(), taskCreationDTO.getEndDate(), taskCreationDTO.getScheduleExpression(), taskCreationDTO.getTimeZone(), taskCreationDTO.getMaximumTimeWindowInMinutes(), version);
                 
                 task.addTaskDestination(taskDestination);
                 task.addTaskInfo(taskInfo);

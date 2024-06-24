@@ -4,16 +4,21 @@ package nttdata.messalhi.forte.entities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "taskdestination")
 public class TaskDestination {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_generator")
+    @SequenceGenerator(name="id_generator", sequenceName = "id_seq", initialValue = 100000, allocationSize = 1)
+    private Long id;
     private String url;
     private String httpMethod;
     private String body;
@@ -26,19 +31,18 @@ public class TaskDestination {
     public TaskDestination() {
     }
 
-    public TaskDestination(String id, String url, String httpMethod, String body, int version) {
-        this.id = id;
+    public TaskDestination(String url, String httpMethod, String body, int version) {
         this.url = url;
         this.httpMethod = httpMethod;
         this.body = body;
         this.version = version;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

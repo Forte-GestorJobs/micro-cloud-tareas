@@ -9,7 +9,9 @@ import java.util.Date;
 @Table(name = "taskschedule")
 public class TaskSchedule {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "id_generator")
+    @SequenceGenerator(name="id_generator", sequenceName = "id_seq", initialValue = 100000, allocationSize = 1)
+    private Long id;
     private Date startDate;
     private Date endDate;
     private String scheduleExpression;
@@ -24,8 +26,7 @@ public class TaskSchedule {
     public TaskSchedule() {
     }
 
-    public TaskSchedule(String id, Date startDate, Date endDate, String scheduleExpression, String timeZone, int maximumTimeWindowInMinutes, int version) {
-        this.id = id;
+    public TaskSchedule(Date startDate, Date endDate, String scheduleExpression, String timeZone, int maximumTimeWindowInMinutes, int version) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.scheduleExpression = scheduleExpression;
@@ -34,11 +35,11 @@ public class TaskSchedule {
         this.version = version;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -14,13 +14,13 @@ public class TaskDestinationRaceService {
     private static String taskDestinationClass = "TaskDestination ";
     @Autowired
     private TaskDestinationDAO taskDestinationDAO;
-    public boolean existsTaskDestination(String id) {
+    public boolean existsTaskDestination(Long id) {
         Optional<TaskDestination> optUser = this.taskDestinationDAO.findById(id);
         return optUser.isPresent();
     }
     public DatabaseResult addTaskDestination(TaskDestination taskDestination) {
         try{
-            String id = taskDestination.getId();
+            Long id = taskDestination.getId();
             if (existsTaskDestination(id)){
                 return new DatabaseResult(false, taskDestinationClass +"already exists");
             }
@@ -34,7 +34,7 @@ public class TaskDestinationRaceService {
         }
     }
 
-    public DatabaseResult getTaskDestination(String id) {
+    public DatabaseResult getTaskDestination(Long id) {
         try {
             if (existsTaskDestination(id)) {
                 TaskDestination taskDestination = this.taskDestinationDAO.getReferenceById(id);
@@ -49,7 +49,7 @@ public class TaskDestinationRaceService {
         }
     }
     
-    public DatabaseResult deleteTaskDestination(String id) {
+    public DatabaseResult deleteTaskDestination(Long id) {
         try {
             if (existsTaskDestination(id)) {
                 this.taskDestinationDAO.deleteById(id);
@@ -63,7 +63,7 @@ public class TaskDestinationRaceService {
 
     public DatabaseResult updateTaskDestination(TaskDestination taskDestination) {
         try {
-            String id = taskDestination.getId();
+            Long id = taskDestination.getId();
             String url = taskDestination.getUrl();
             String httpMethod = taskDestination.getHttpMethod();
             String body = taskDestination.getBody();

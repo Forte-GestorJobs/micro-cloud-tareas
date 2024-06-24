@@ -148,50 +148,38 @@ public class Task {
             jsonBuilder.append("\"name\": \"").append(this.name).append("\", ");
             jsonBuilder.append("\"creationDate\": \"").append(this.creationDate).append("\", ");
             jsonBuilder.append("\"userId\": \"").append(this.userId).append("\", ");
-            
-            // Agregar tamaño de las listas
-            jsonBuilder.append("\"taskInfoSize\": \"").append(this.taskInfo.size()).append("\", ");
-            jsonBuilder.append("\"taskScheduleSize\": \"").append(this.taskSchedule.size()).append("\", ");
-            jsonBuilder.append("\"taskDestinationSize\": \"").append(this.taskDestination.size()).append("\", ");
-            
-            // Serializar los elementos de taskInfo
-            jsonBuilder.append("\"taskInfo\": [");
+
+            jsonBuilder.append("\"taskData\": [");
             for (int i = 0; i < this.taskInfo.size(); i++) {
                 TaskInfo taskInfo = this.taskInfo.get(i);
-                jsonBuilder.append(taskInfo.toStringJSON());
+                TaskSchedule taskSchedule = this.taskSchedule.get(i);
+                TaskDestination taskDestination= this.taskDestination.get(i);
+                jsonBuilder.append("{");
+                jsonBuilder.append("\"version\": \"").append(taskInfo.getVersion()).append("\", ");
+                jsonBuilder.append("\"description\": \"").append(taskInfo.getDescription()).append("\", ");
+                jsonBuilder.append("\"state\": \"").append(taskInfo.getState()).append("\", ");
+                jsonBuilder.append("\"startDate\": \"").append(taskSchedule.getStartDate()).append("\", ");
+                jsonBuilder.append("\"endDate\": \"").append(taskSchedule.getEndDate()).append("\", ");
+                jsonBuilder.append("\"scheduleExpression\": \"").append(taskSchedule.getScheduleExpression()).append("\", ");
+                jsonBuilder.append("\"timeZone\": \"").append(taskSchedule.getTimeZone()).append("\", ");
+                jsonBuilder.append("\"maximumTimeWindowInMinutes\": \"").append(taskSchedule.getMaximumTimeWindowInMinutes()).append("\", ");
+                jsonBuilder.append("\"url\": \"").append(taskDestination.getUrl()).append("\", ");
+                jsonBuilder.append("\"httpMethod\": \"").append(taskDestination.getHttpMethod()).append("\", ");
+                jsonBuilder.append("\"body\": \"").append(taskDestination.getBody()).append("\"");
+                jsonBuilder.append("}");
+
                 if (i < this.taskInfo.size() - 1) {
                     jsonBuilder.append(", ");
                 }
             }
-            jsonBuilder.append("], ");
             
-            // Serializar los elementos de taskSchedule
-            jsonBuilder.append("\"taskSchedule\": [");
-            for (int i = 0; i < this.taskSchedule.size(); i++) {
-                TaskSchedule taskSchedule = this.taskSchedule.get(i);
-                jsonBuilder.append(taskSchedule.toStringJSON());
-                if (i < this.taskSchedule.size() - 1) {
-                    jsonBuilder.append(", ");
-                }
-            }
-            jsonBuilder.append("], ");
-            
-            // Serializar los elementos de taskDestination
-            jsonBuilder.append("\"taskDestination\": [");
-            for (int i = 0; i < this.taskDestination.size(); i++) {
-                TaskDestination taskDestination = this.taskDestination.get(i);
-                jsonBuilder.append(taskDestination.toStringJSON());
-                if (i < this.taskDestination.size() - 1) {
-                    jsonBuilder.append(", ");
-                }
-            }
             jsonBuilder.append("]");
             
             jsonBuilder.append("}");
             return jsonBuilder.toString();
         } catch (Exception e) {
             e.printStackTrace();
-            return "{}"; // Manejo de errores
+            return "{}"; 
         }
     }
     
