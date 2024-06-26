@@ -165,7 +165,7 @@ public class Task {
                 jsonBuilder.append("\"maximumTimeWindowInMinutes\": \"").append(taskSchedule.getMaximumTimeWindowInMinutes()).append("\", ");
                 jsonBuilder.append("\"url\": \"").append(taskDestination.getUrl()).append("\", ");
                 jsonBuilder.append("\"httpMethod\": \"").append(taskDestination.getHttpMethod()).append("\", ");
-                jsonBuilder.append("\"body\": \"").append(taskDestination.getBody()).append("\"");
+                jsonBuilder.append("\"body\": \"").append(taskDestination.getBody().replace("\"", "\\\"")).append("\"");
                 jsonBuilder.append("}");
 
                 if (i < this.taskInfo.size() - 1) {
