@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -141,45 +145,58 @@ public class Task {
     }
 
     public String toStringJSON() {
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            StringBuilder jsonBuilder = new StringBuilder("{");
-            jsonBuilder.append("\"id\": \"").append(this.id).append("\", ");
-            jsonBuilder.append("\"arn\": \"").append(this.arn).append("\", ");
-            jsonBuilder.append("\"name\": \"").append(this.name).append("\", ");
-            jsonBuilder.append("\"creationDate\": \"").append(this.creationDate).append("\", ");
-            jsonBuilder.append("\"userId\": \"").append(this.userId).append("\", ");
+            ObjectNode jsonNode = mapper.createObjectNode();
+            jsonNode.put("id", this.id);
+            jsonNode.put("arn", this.arn);
+            jsonNode.put("name", this.name);
+            if (this.creationDate.toString() != null) {
+                jsonNode.put("creationDate", this.creationDate.toString());
+            }
+            else{
+                jsonNode.put("creationDate", "null");
+            }
+            jsonNode.put("userId", this.userId);
 
-            jsonBuilder.append("\"taskData\": [");
+            ArrayNode taskDataArray = mapper.createArrayNode();
             for (int i = 0; i < this.taskInfo.size(); i++) {
                 TaskInfo taskInfo = this.taskInfo.get(i);
                 TaskSchedule taskSchedule = this.taskSchedule.get(i);
-                TaskDestination taskDestination= this.taskDestination.get(i);
-                jsonBuilder.append("{");
-                jsonBuilder.append("\"version\": \"").append(taskInfo.getVersion()).append("\", ");
-                jsonBuilder.append("\"description\": \"").append(taskInfo.getDescription()).append("\", ");
-                jsonBuilder.append("\"state\": \"").append(taskInfo.getState()).append("\", ");
-                jsonBuilder.append("\"startDate\": \"").append(taskSchedule.getStartDate()).append("\", ");
-                jsonBuilder.append("\"endDate\": \"").append(taskSchedule.getEndDate()).append("\", ");
-                jsonBuilder.append("\"scheduleExpression\": \"").append(taskSchedule.getScheduleExpression()).append("\", ");
-                jsonBuilder.append("\"timeZone\": \"").append(taskSchedule.getTimeZone()).append("\", ");
-                jsonBuilder.append("\"maximumTimeWindowInMinutes\": \"").append(taskSchedule.getMaximumTimeWindowInMinutes()).append("\", ");
-                jsonBuilder.append("\"url\": \"").append(taskDestination.getUrl()).append("\", ");
-                jsonBuilder.append("\"httpMethod\": \"").append(taskDestination.getHttpMethod()).append("\", ");
-                jsonBuilder.append("\"body\": \"").append(taskDestination.getBody().replace("\"", "\\\"")).append("\"");
-                jsonBuilder.append("}");
+                TaskDestination taskDestination = this.taskDestination.get(i);
 
-                if (i < this.taskInfo.size() - 1) {
-                    jsonBuilder.append(", ");
+                ObjectNode taskNode = mapper.createObjectNode();
+                taskNode.put("version", taskInfo.getVersion());
+                taskNode.put("description", taskInfo.getDescription());
+                taskNode.put("state", taskInfo.getState());
+                if (taskSchedule.getStartDate() != null) {
+                    taskNode.put("startDate", taskSchedule.getStartDate().toString());
                 }
+                else{
+                    taskNode.put("startDate", "null");
+                }
+                if (taskSchedule.getEndDate() != null) {
+                    taskNode.put("endDate", taskSchedule.getEndDate().toString());
+                }
+                else{
+                    taskNode.put("endDate", "null");
+                }
+
+                taskNode.put("scheduleExpression", taskSchedule.getScheduleExpression());
+                taskNode.put("timeZone", taskSchedule.getTimeZone());
+                taskNode.put("maximumTimeWindowInMinutes", taskSchedule.getMaximumTimeWindowInMinutes());
+                taskNode.put("url", taskDestination.getUrl());
+                taskNode.put("httpMethod", taskDestination.getHttpMethod());
+                taskNode.put("body", taskDestination.getBody());
+
+                taskDataArray.add(taskNode);
             }
-            
-            jsonBuilder.append("]");
-            
-            jsonBuilder.append("}");
-            return jsonBuilder.toString();
+            jsonNode.set("taskData", taskDataArray);
+
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
         } catch (Exception e) {
             e.printStackTrace();
-            return "{}"; 
+            return "{}";
         }
     }
     
